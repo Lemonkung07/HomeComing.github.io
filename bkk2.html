@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Home Coming: First Card (กรุงเทพ)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&family=Permanent+Marker&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Prompt', sans-serif; background: #fdf6e3; background-image: radial-gradient(#d4b483 1px, transparent 1px); background-size: 20px 20px; min-height: 100vh; color: #451a03; }
+        .font-rock { font-family: 'Permanent Marker', cursive; }
+        .font-hand { font-family: 'Caveat', cursive; }
+        
+        .card { background: white; border-radius: 1rem; box-shadow: 4px 4px 0px #d97706; border: 2px solid #d97706; }
+        .screen { display: none; animation: fadeIn 0.3s ease-out; }
+        .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 1rem;}
+        
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+        .animate-fade-in-up { animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        .animate-float { animation: float 4s ease-in-out infinite; }
+
+        .input-warm { width: 100%; border-bottom: 2px dashed #d97706; background: transparent; padding: 0.5rem; text-align: center; font-size: 1.25rem; color: #78350f; outline: none; transition: all 0.2s; }
+        .input-warm:focus { border-bottom: 2px solid #ea580c; }
+        
+        input[type="radio"]:checked + span { color: #ea580c; font-weight: 700; }
+        .radio-card:has(input[type="radio"]:checked) { border-color: #f97316; background-color: #fff7ed; transform: scale(1.02); }
+
+        #card-scale-container { width: 100%; overflow: hidden; display: flex; flex-direction: column; align-items: center; }
+        .card-wrapper { width: 100%; display: flex; justify-content: center; transform-origin: top center; }
+        .scaler-box { position: relative; transition: width 0.2s, height 0.2s; margin: 0 auto; }
+
+        .my-card-h { 
+            width: 700px; min-width: 700px; max-width: 700px;
+            min-height: 380px; 
+            position: absolute; top: 0; left: 0;
+            padding: 3px; border-radius: 20px; 
+            background: linear-gradient(135deg, #f97316, #fbbf24, #ef4444); 
+            box-shadow: 0 15px 35px rgba(249, 115, 22, 0.2); 
+            transform-origin: top left;
+        }
+        .my-card-h-inner { background-color: #ffffff; border-radius: 17px; padding: 2rem; position: relative; overflow: hidden; height: 100%; min-height: 374px; }
+
+        .my-card-v { 
+            width: 380px; min-width: 380px; max-width: 380px;
+            min-height: 600px; 
+            position: absolute; top: 0; left: 0;
+            padding: 3px; border-radius: 20px; 
+            background: linear-gradient(135deg, #f97316, #fbbf24, #ef4444); 
+            box-shadow: 0 15px 35px rgba(249, 115, 22, 0.2); 
+            transform-origin: top left;
+        }
+        .my-card-v-inner { background-color: #ffffff; border-radius: 17px; padding: 2rem; position: relative; overflow: hidden; height: 100%; display: flex; flex-direction: column; min-height: 594px;}
+
+        .orb-orange { position: absolute; top: -60px; left: -60px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(249,115,22,0.3) 0%, rgba(249,115,22,0) 70%); border-radius: 50%; pointer-events: none; }
+        .orb-red { position: absolute; bottom: -60px; right: -60px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(239,68,68,0.3) 0%, rgba(239,68,68,0) 70%); border-radius: 50%; pointer-events: none; }
+        
+        .lanyard-hole { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); width: 60px; height: 12px; background-color: #f4f4f5; border-radius: 10px; border: 2px solid #e4e4e7; z-index: 20; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+    <div id="custom-alert" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[9999] hidden flex items-center justify-center p-4 transition-opacity duration-300 opacity-0">
+        <div class="card p-6 max-w-xs w-full text-center relative transform scale-95 transition-transform duration-300" id="custom-alert-box">
+            <div class="text-6xl mb-2 animate-bounce">🥺</div>
+            <h3 class="text-3xl handwriting text-orange-600 mb-2">เดี๋ยวก่อนวัยรุ่น!</h3>
+            <p id="custom-alert-msg" class="text-amber-800 font-medium mb-6">อย่าเพิ่งข้ามสิ กรอกข้อมูลให้หน่อยน้า</p>
+            <button onclick="closeAlert()" class="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-6 py-3 rounded-full font-bold shadow-[0px_4px_0px_#b45309] active:shadow-none active:translate-y-[4px] transition-all w-full text-lg">รับทราบ!</button>
+        </div>
+    </div>
+
+    <div id="search-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4 transition-opacity duration-300 opacity-0">
+        <div class="card p-6 max-w-sm w-full text-center relative transform scale-95 transition-transform duration-300 shadow-2xl" id="search-modal-box">
+            <div class="text-5xl mb-4">🔍</div>
+            <h3 class="text-2xl font-black text-amber-900 mb-2">ค้นหานามบัตรเดิม</h3>
+            <p class="text-sm text-zinc-500 mb-6">กรอกเบอร์โทรศัพท์ที่คุณใช้สร้างนามบัตรไว้ เพื่อดึงข้อมูลกลับมา</p>
+
+            <input type="tel" id="search-phone-input" class="input-warm w-full text-center mb-6" placeholder="08xxxxxxxx">
+
+            <div class="flex gap-2 w-full">
+                <button onclick="closeSearchModal()" class="w-1/3 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-bold py-3 rounded-xl transition-colors border border-zinc-200 flex justify-center items-center">
+                    ยกเลิก
+                </button>
+                <button onclick="searchUserData()" id="btn-search-submit" class="flex-1 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-3 rounded-xl shadow-[0px_4px_0px_#b45309] active:shadow-none active:translate-y-[4px] transition-all flex justify-center items-center">
+                    ค้นหาข้อมูล
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="capture-overlay" class="fixed inset-0 bg-[#fdf6e3] z-[9999] flex flex-col items-center justify-center hidden">
+        <div class="text-6xl mb-4 animate-bounce">📸</div>
+        <h2 class="text-3xl font-black text-orange-600 font-rock tracking-widest">SMILE!</h2>
+        <p class="text-amber-800 font-bold mt-2 text-xl">กำลังแคปเจอร์รูปภาพแบบคมชัด 100%...</p>
+    </div>
+
+    <div id="screen-welcome" class="screen active w-full">
+        <div class="text-center mb-6 relative z-10 pt-10">
+            <h1 class="text-[12vw] sm:text-6xl md:text-7xl font-rock text-orange-600 drop-shadow-md mb-2 animate-float tracking-tighter leading-none">HOMECOMING</h1>
+            <p class="text-xl text-amber-800 font-bold animate-fade-in-up delay-100">Community of rock</p>
+            
+            <p class="text-md text-orange-700 font-black tracking-widest uppercase mt-3 animate-fade-in-up delay-100 bg-orange-100 inline-block px-4 py-1.5 rounded-full border border-orange-200">
+                📍 รอบที่ 1 : กรุงเทพมหานคร
+            </p>
+
+            <p class="text-sm text-amber-700 mt-4 max-w-xs mx-auto animate-fade-in-up delay-200">
+                ชวนน้องๆ สร้างนามบัตรใบแรก ที่บอกฝันที่ยิ่งใหญ่ และเป้าหมายสูงสุด ที่อยากไปให้ถึง
+            </p>
+        </div>
+
+        <div class="flex flex-col gap-4 animate-fade-in-up delay-300 w-full max-w-[300px]">
+            <button onclick="startQuestions()" class="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-8 py-4 rounded-full text-xl shadow-[0px_6px_0px_#b45309] active:shadow-none active:translate-y-[6px] transition-all font-bold">
+                🎫 สร้างนามบัตรใหม่
+            </button>
+
+            <button onclick="openSearchModal()" class="w-full bg-white hover:bg-amber-50 text-orange-600 border-2 border-orange-200 px-8 py-3.5 rounded-full text-lg shadow-[0px_4px_0px_#fed7aa] active:shadow-none active:translate-y-[4px] transition-all font-bold flex items-center justify-center gap-2">
+                🔍 ค้นหานามบัตรของฉัน
+            </button>
+        </div>
+
+        <div class="mt-8 bg-white/70 backdrop-blur-sm border-2 border-orange-200 px-6 py-3 rounded-2xl inline-flex items-center shadow-sm animate-fade-in-up delay-300">
+            <span class="text-amber-900 font-bold">🔥 วัยรุ่นรอบนี้สู้ชีวิตไปแล้ว:</span>
+            <span id="live-count" class="text-3xl font-black text-orange-600 mx-2 animate-pulse">0</span>
+            <span class="text-amber-900 font-bold">คน</span>
+        </div>
+    </div>
+
+    <div id="screen-question" class="screen w-full max-w-md mx-auto">
+        <div class="card p-6 w-full text-center relative animate-fade-in-up">
+            <span class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-amber-500 text-white px-4 py-1 rounded-full text-xs font-bold shadow-sm" id="q-counter">ข้อที่ 1 / 12</span>
+            
+            <h2 class="text-lg font-bold mb-4 text-amber-900 mt-4 leading-snug" id="q-title">คำถาม...</h2>
+            <p class="text-xs text-amber-600 mb-4 hidden bg-amber-50 py-1 px-3 rounded-full inline-block border border-amber-200" id="q-guide"></p>
+
+            <div class="mb-4" id="input-container"></div>
+            
+            <div class="flex gap-3 mt-6">
+                <button id="btn-back" onclick="prevQuestion()" class="hidden w-1/3 bg-white hover:bg-amber-50 text-amber-700 font-bold py-3 rounded-xl border-2 border-amber-200 shadow-[0px_4px_0px_#fde68a] active:shadow-none active:translate-y-[4px] transition-all flex justify-center items-center">
+                    <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"></path></svg> กลับ
+                </button>
+                <button id="btn-next" onclick="nextQuestion()" class="flex-1 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-3 rounded-xl shadow-[0px_4px_0px_#b45309] active:shadow-none active:translate-y-[4px] transition-all flex justify-center items-center">
+                    ข้อต่อไป <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-loading" class="screen w-full">
+        <div class="text-center animate-pulse">
+            <div class="text-6xl mb-4">⏳</div>
+            <h2 class="text-2xl font-bold text-amber-900" id="loading-msg">กำลังสลักนามบัตร...</h2>
+            <p class="text-amber-700">ตรวจสอบความถูกต้องและบันทึกข้อมูล</p>
+        </div>
+    </div>
+
+    <div id="screen-result" class="screen w-full max-w-5xl mx-auto px-0">
+        <div class="w-full relative animate-fade-in-up flex flex-col items-center">
+            
+            <h2 class="text-center font-bold text-amber-900 mb-4 text-2xl">🎉 นามบัตรของคุณพร้อมแล้ว!</h2>
+
+            <div class="flex justify-center gap-2 mb-6 w-full max-w-[400px] px-4">
+                <button onclick="switchView('horizontal')" id="btn-horizontal" class="flex-1 bg-orange-500 text-white font-bold py-3 px-4 rounded-xl shadow-sm transition-all">แนวนอน 🎟️</button>
+                <button onclick="switchView('vertical')" id="btn-vertical" class="flex-1 bg-white text-orange-500 border-2 border-orange-200 font-bold py-3 px-4 rounded-xl shadow-sm transition-all">แนวตั้ง 🏷️</button>
+            </div>
+
+            <div id="card-scale-container">
+                
+                <div id="wrapper-horizontal" class="card-wrapper">
+                    <div id="h-scaler" class="scaler-box">
+                        <div id="card-horizontal" class="my-card-h">
+                            <div class="my-card-h-inner">
+                                <div class="orb-orange"></div><div class="orb-red"></div>
+                                
+                                <div class="flex justify-between items-center mb-8 relative z-10 border-b-2 border-zinc-100 pb-4">
+                                    <h2 id="h_title" class="font-rock text-5xl text-orange-600 tracking-tighter drop-shadow-sm m-0">HOMECOMING</h2>
+                                    <div id="h_no_box" class="text-orange-600 font-rock text-2xl px-4 py-1 border-2 border-orange-200 rounded-lg bg-orange-50/50 shadow-sm">
+                                        <div id="h_no_text" style="display: inline-block;">NO. <span id="h_order">000</span></div>
+                                    </div>
+                                </div>
+
+                                <div class="relative z-10 flex flex-row gap-8 items-stretch">
+                                    <div class="w-1/2 border-l-4 border-orange-500 pl-6 flex flex-col justify-center text-left">
+                                        <p class="text-[1.75rem] italic font-light text-zinc-500 mb-6 leading-tight drop-shadow-sm" id="h_motto">"โหลด..."</p>
+                                        
+                                        <h3 class="text-[1.35rem] font-black text-zinc-800 tracking-tight leading-snug" id="h_name">โหลด...</h3>
+                                        
+                                        <div id="h_major_box" class="inline-block mt-3 bg-zinc-50 text-zinc-600 px-4 py-1.5 rounded-lg text-sm font-bold uppercase tracking-widest border border-zinc-200 w-max">
+                                            <div id="h_major_text" style="display: inline-block;">โหลด...</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="w-1/2 space-y-4 flex flex-col justify-center text-left">
+                                        <div class="bg-gradient-to-r from-orange-50 to-white p-4 rounded-xl border-l-4 border-orange-400 shadow-sm">
+                                            <p id="h_label_dream" class="text-orange-500 text-xs font-black uppercase tracking-widest mb-1">🎯 Next Chapter</p>
+                                            <p class="text-zinc-800 font-bold text-lg leading-snug" id="h_dream">โหลด...</p>
+                                        </div>
+                                        <div class="bg-gradient-to-r from-red-50 to-white p-4 rounded-xl border-l-4 border-red-500 shadow-sm">
+                                            <p id="h_label_dedicate" class="text-red-500 text-xs font-black uppercase tracking-widest mb-1">🔥 เหตุผลที่ต้องรอด</p>
+                                            <p class="text-zinc-800 font-bold text-lg leading-snug" id="h_dedicate">โหลด...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="wrapper-vertical" class="card-wrapper" style="display: none;">
+                    <div id="v-scaler" class="scaler-box">
+                        <div id="card-vertical" class="my-card-v">
+                            <div class="my-card-v-inner pt-12 pb-6">
+                                <div class="lanyard-hole"></div>
+                                <div class="orb-orange"></div><div class="orb-red"></div>
+                                
+                                <div class="text-center relative z-10 mb-6 mt-4">
+                                    <h2 id="v_title" class="font-rock text-[2.75rem] text-orange-600 tracking-tighter drop-shadow-sm leading-none m-0">HOMECOMING</h2>
+                                </div>
+
+                                <div class="text-center relative z-10 mb-6">
+                                    <div id="v_no_box" class="inline-block text-orange-600 font-rock text-2xl px-6 py-1 border-2 border-orange-200 rounded-lg bg-orange-50/50 shadow-sm">
+                                        <div id="v_no_text" style="display: inline-block;">NO. <span id="v_order">000</span></div>
+                                    </div>
+                                </div>
+
+                                <div class="relative z-10 text-center border-b-2 border-zinc-100 pb-6 mb-6 px-2">
+                                    <p class="text-3xl italic font-light text-zinc-500 leading-tight mb-4 drop-shadow-sm" id="v_motto">"โหลด..."</p>
+                                    
+                                    <h3 class="text-[1.35rem] font-black text-zinc-800 tracking-tight leading-snug" id="v_name">โหลด...</h3>
+                                    
+                                    <div id="v_major_box" class="inline-block mt-4 bg-zinc-50 text-zinc-600 px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest border border-zinc-200 w-max">
+                                        <div id="v_major_text" style="display: inline-block;">โหลด...</div>
+                                    </div>
+                                </div>
+
+                                <div class="relative z-10 space-y-4 mt-auto">
+                                    <div class="bg-gradient-to-r from-orange-50 to-white p-4 rounded-xl border-l-4 border-orange-400 text-left shadow-sm">
+                                        <p id="v_label_dream" class="text-orange-500 text-xs font-black uppercase tracking-widest mb-1">🎯 Next Chapter</p>
+                                        <p class="text-zinc-800 font-bold text-[15px] leading-snug" id="v_dream">โหลด...</p>
+                                    </div>
+                                    <div class="bg-gradient-to-r from-red-50 to-white p-4 rounded-xl border-l-4 border-red-500 text-left shadow-sm">
+                                        <p id="v_label_dedicate" class="text-red-500 text-xs font-black uppercase tracking-widest mb-1">🔥 เหตุผลที่ต้องรอด</p>
+                                        <p class="text-zinc-800 font-bold text-[15px] leading-snug" id="v_dedicate">โหลด...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="w-full px-4 mt-6 z-10">
+                <button id="btn-download" onclick="downloadCurrentCard()" class="w-full max-w-[400px] mx-auto block bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-4 rounded-xl shadow-[0px_4px_0px_#064e3b] active:shadow-none active:translate-y-[4px] transition-all text-xl flex justify-center items-center gap-2">
+                    📸 บันทึกนามบัตรเป็นรูปภาพ
+                </button>
+                <button onclick="location.reload()" class="w-full mt-6 text-amber-700 underline font-bold text-sm text-center block">กลับไปหน้าแรก</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 🛑 ใส่ URL ของ Apps Script ตรงนี้ 🛑
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyZCTrNKvWNLakvvHeWNey3IW1b85xCYjwuMFX4aXlpfdFr6Hz6PpaRxMgHCbybSuED/exec"; 
+
+        const questions = [
+            { id: "fullname", title: "ชื่อจริง - นามสกุล", type: "text", placeholder: "เช่น นายสมชาย สู้ชีวิต" },
+            { id: "nickname", title: "ชื่อเล่น / ฉายาในวงการ", type: "text", placeholder: "เช่น บอย" },
+            { id: "major", title: "เรียนจบสายไหน / สาขาอะไรมา?", type: "text", placeholder: "เช่น ช่างยนต์, คอมพิวเตอร์" },
+            { id: "fb", title: "เปิดวาร์ป Facebook Account หน่อย", type: "text", placeholder: "ลิ้งก์หรือชื่อเฟซบุ๊ก" },
+            { id: "address", title: "ที่อยู่ปัจจุบันที่สุด", type: "textarea", placeholder: "เผื่ออนาคตบ้านหลังนี้มีของซัพพอร์ตส่งไปให้ถึงบ้าน" },
+            { id: "phone", title: "เบอร์โทรศัพท์ติดต่อ", type: "tel", placeholder: "08xxxxxxxx", guide: "ระบบใช้เบอร์โทรสำหรับตรวจสอบข้อมูลซ้ำ" },
+            { id: "status", title: "อัปเดตสเตตัสชีวิตตอนนี้นิดนึง", type: "choice", options: ["ลุยงานแล้ว (ทำงานตรงสาย)", "ลุยงานแล้ว (ทำงานไม่ตรงสาย แต่ได้ตังค์ก็โอเค)", "กำลังหาทำ (กำลังหางานอยู่)", "กำลังต่อยอด (กำลังศึกษาต่อ)"] },
+            { id: "proud", title: "ตลอดเวลาที่สู้ชีวิตเรียนมาจนจบ อะไรคือ 'ความอึด' ที่เราภูมิใจในตัวเองแบบสุดๆ?", type: "textarea", placeholder: "เล่ามาเลยให้ชื่นใจหน่อย..." },
+            { id: "fear", title: "โลกความจริงข้างนอก มีเรื่องไหนที่แอบทำให้เรากลัวหรือกังวลที่สุด?", type: "text", placeholder: "บอกมาได้เลย..." },
+            { id: "dream", title: "'ความฝันสูงสุด' น้องอยากเป็นแบบไหนในอนาคต?", type: "text", placeholder: "เช่น ว่าที่เจ้าของอู่ซ่อมรถที่เจ๋งที่สุด", guide: "จัดเต็มมาเลย ไม่ต้องเกรงใจใคร" },
+            { id: "motto", title: "'คาถาประจำตัว' หรือ ประโยคเด็ดที่เอาไว้เตือนใจเวลาท้อ", type: "text", placeholder: "เช่น เหนื่อยก็พัก แต่อย่าเพิ่งหยุดเดิน" },
+            { id: "dedicate", title: "ความสำเร็จต่อจากนี้... อยากเอาไปฝาก 'ใคร' มากที่สุด?", type: "text", placeholder: "เช่น แม่, พ่อ, ตัวเอง" }
+        ];
+
+        let currentStep = 0;
+        let userData = { answers: {} };
+        let currentView = 'horizontal';
+        let activeUserNickname = "";
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function showAlert(msg) {
+            document.getElementById('custom-alert-msg').innerText = msg;
+            const modal = document.getElementById('custom-alert');
+            const box = document.getElementById('custom-alert-box');
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); box.classList.remove('scale-95'); box.classList.add('scale-100'); }, 10);
+        }
+
+        function closeAlert() {
+            const modal = document.getElementById('custom-alert');
+            const box = document.getElementById('custom-alert-box');
+            modal.classList.add('opacity-0'); box.classList.remove('scale-100'); box.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300); 
+        }
+
+        function openSearchModal() {
+            const modal = document.getElementById('search-modal');
+            const box = document.getElementById('search-modal-box');
+            document.getElementById('search-phone-input').value = ""; 
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); box.classList.remove('scale-95'); box.classList.add('scale-100'); }, 10);
+            setTimeout(() => { document.getElementById('search-phone-input').focus(); }, 300);
+        }
+
+        function closeSearchModal() {
+            const modal = document.getElementById('search-modal');
+            const box = document.getElementById('search-modal-box');
+            modal.classList.add('opacity-0'); box.classList.remove('scale-100'); box.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        async function searchUserData() {
+            const phoneInput = document.getElementById('search-phone-input').value.trim();
+            if (!phoneInput) { 
+                closeSearchModal(); 
+                setTimeout(() => showAlert("กรุณากรอกเบอร์โทรศัพท์ก่อนค้นหานะวัยรุ่น!"), 300); 
+                return; 
+            }
+
+            const btnSubmit = document.getElementById('btn-search-submit');
+            const originalText = btnSubmit.innerHTML;
+            btnSubmit.innerHTML = "⏳ ค้นหา...";
+            btnSubmit.disabled = true;
+
+            try {
+                const response = await fetch(SCRIPT_URL + `?action=searchUser&sheet=กรุงเทพ&phone=${encodeURIComponent(phoneInput)}`);
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    closeSearchModal();
+                    
+                    // 🌟 สิ่งที่แก้ไข: แปลงคีย์ภาษาไทยจาก Sheet ให้เป็นคีย์ภาษาอังกฤษที่หน้าเว็บรู้จัก 🌟
+                    userData.answers = {
+                        fullname: result.data["ชื่อจริง-นามสกุล"] || "",
+                        nickname: result.data["ชื่อ/ฉายา"] || "",
+                        major: result.data["สาย/สาขา"] || "",
+                        dream: result.data["ความฝัน"] || "",
+                        motto: result.data["คาถาประจำตัว"] || "",
+                        dedicate: result.data["เพื่อใคร"] || ""
+                    };
+                    
+                    userData.order = String(result.order).padStart(3, '0');
+                    
+                    // หน่วงเวลาเล็กน้อยให้ Popup เสิร์ชปิดสนิทก่อนค่อยโชว์การ์ด
+                    setTimeout(() => { generateCard(); }, 300); 
+
+                } else if (result.status === 'not_found') {
+                    closeSearchModal(); 
+                    setTimeout(() => showAlert("ไม่พบข้อมูลนามบัตรที่ใช้เบอร์โทรนี้น้า ลองเช็คเบอร์อีกที หรือกดสร้างใบใหม่ได้เลย!"), 300);
+                } else {
+                    closeSearchModal();
+                    setTimeout(() => showAlert("เกิดข้อผิดพลาด: " + result.message), 300);
+                }
+            } catch (err) {
+                closeSearchModal();
+                setTimeout(() => showAlert("เชื่อมต่อระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"), 300);
+            } finally {
+                btnSubmit.innerHTML = originalText;
+                btnSubmit.disabled = false;
+            }
+        }
+
+        function startQuestions() {
+            currentStep = 0;
+            userData.answers = {}; 
+            showScreen('screen-question');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const q = questions[currentStep];
+            document.getElementById('q-counter').innerText = `ข้อที่ ${currentStep + 1} / ${questions.length}`;
+            document.getElementById('q-title').innerText = q.title;
+            
+            const guide = document.getElementById('q-guide');
+            if (q.guide) { guide.innerText = q.guide; guide.classList.remove('hidden'); } 
+            else { guide.classList.add('hidden'); }
+
+            const container = document.getElementById('input-container');
+            const savedAnswer = userData.answers[q.id] || ""; 
+
+            let inputHtml = '';
+            if (q.type === 'choice') {
+                inputHtml = `<div class="flex flex-col gap-2 text-left">`;
+                let isOtherChecked = savedAnswer !== "" && !q.options.includes(savedAnswer);
+                
+                q.options.forEach((opt) => {
+                    const isChecked = savedAnswer === opt ? "checked" : "";
+                    inputHtml += `
+                        <label class="radio-card flex items-center bg-white p-3 rounded-xl border-2 border-amber-100 cursor-pointer hover:border-orange-300 transition-all">
+                            <input type="radio" name="choice_input" value="${opt}" class="hidden" onchange="toggleOther(false)" ${isChecked}>
+                            <span class="text-amber-900 font-medium ml-2 w-full select-none text-sm">${opt}</span>
+                        </label>`;
+                });
+
+                inputHtml += `
+                    <label class="radio-card flex items-center bg-white p-3 rounded-xl border-2 border-amber-100 cursor-pointer hover:border-orange-300 transition-all">
+                        <input type="radio" name="choice_input" value="other" class="hidden" onchange="toggleOther(true)" ${isOtherChecked ? "checked" : ""}>
+                        <span class="text-amber-900 font-medium ml-2 w-full select-none text-sm">อื่นๆ (ระบุ)</span>
+                    </label>
+                    <div id="other-box" class="${isOtherChecked ? '' : 'hidden'} mt-2 transition-all">
+                        <input type="text" id="other-input" class="input-warm w-full text-left px-4" placeholder="โปรดระบุสเตตัสของคุณ..." value="${isOtherChecked ? savedAnswer : ''}">
+                    </div>
+                </div>`;
+            } else if (q.type === 'textarea') {
+                inputHtml = `<textarea id="current-input" rows="3" class="input-warm bg-white rounded-lg shadow-inner" placeholder="${q.placeholder}">${savedAnswer}</textarea>`;
+            } else {
+                inputHtml = `<input type="${q.type}" id="current-input" class="input-warm bg-white rounded-lg shadow-inner" placeholder="${q.placeholder}" value="${savedAnswer}">`;
+            }
+            
+            container.innerHTML = inputHtml;
+            
+            const btnBack = document.getElementById('btn-back');
+            if (currentStep > 0) { btnBack.classList.remove('hidden'); } else { btnBack.classList.add('hidden'); }
+
+            const btnNext = document.getElementById('btn-next');
+            if (currentStep === questions.length - 1) {
+                btnNext.innerHTML = "💾 บันทึกสลักนามบัตร";
+                btnNext.className = "flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-3 rounded-xl shadow-[0px_4px_0px_#064e3b] active:shadow-none active:translate-y-[4px] transition-all flex justify-center items-center";
+            } else {
+                btnNext.innerHTML = `ข้อต่อไป <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>`;
+                btnNext.className = "flex-1 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-3 rounded-xl shadow-[0px_4px_0px_#b45309] active:shadow-none active:translate-y-[4px] transition-all flex justify-center items-center";
+            }
+        }
+
+        function toggleOther(show) {
+            const box = document.getElementById('other-box');
+            if (show) { box.classList.remove('hidden'); setTimeout(() => document.getElementById('other-input').focus(), 50); } 
+            else { box.classList.add('hidden'); document.getElementById('other-input').value = ""; }
+        }
+
+        function prevQuestion() {
+            if (currentStep > 0) { currentStep--; renderQuestion(); }
+        }
+
+        function nextQuestion() {
+            const q = questions[currentStep];
+            let answer = "";
+
+            if (q.type === 'choice') {
+                const checkedRadio = document.querySelector('input[name="choice_input"]:checked');
+                if (!checkedRadio) { showAlert("อย่าลืมเลือกสเตตัสสักข้อนึงน้า 🙏"); return; }
+                if (checkedRadio.value === "other") {
+                    answer = document.getElementById('other-input').value.trim();
+                    if (!answer) { showAlert("เลือกระบุอื่นๆ แล้ว พิมพ์บอกหน่อยน้าว่าคืออะไร 🥺"); return; }
+                } else { answer = checkedRadio.value; }
+            } else {
+                answer = document.getElementById('current-input').value.trim();
+                if (!answer) { showAlert("ข้อมูลนี้จำเป็นน้า พิมพ์บอกหน่อยครับ 🙏"); return; }
+            }
+            
+            userData.answers[q.id] = answer;
+            
+            currentStep++;
+            if (currentStep < questions.length) { renderQuestion(); } 
+            else { submitData(); }
+        }
+
+        async function submitData() {
+            document.getElementById('loading-msg').innerText = "กำลังสลักนามบัตร...";
+            showScreen('screen-loading');
+            userData.sheetName = "กรุงเทพ"; 
+            
+            try {
+                const response = await fetch(SCRIPT_URL, { 
+                    method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" }, 
+                    body: JSON.stringify(userData) 
+                });
+                const result = await response.json();
+                
+                if(result.status === 'duplicate') {
+                    alert('ตรวจพบเบอร์โทรศัพท์นี้ลงทะเบียนไปแล้วครับ! ไม่สามารถสร้างซ้ำได้');
+                    startQuestions();
+                } else if(result.status === 'success') {
+                    userData.order = String(result.order).padStart(3, '0');
+                    generateCard();
+                    fetchLiveCount();
+                } else {
+                    alert('เกิดข้อผิดพลาด: ' + result.message);
+                    startQuestions();
+                }
+            } catch (error) {
+                alert("มีปัญหาการเชื่อมต่อเซิร์ฟเวอร์ แต่ระบบกำลังสร้างนามบัตรให้แบบออฟไลน์ครับ");
+                userData.order = "XXX";
+                generateCard();
+            }
+        }
+
+        function switchView(view) {
+            currentView = view;
+            const hWrapper = document.getElementById('wrapper-horizontal');
+            const vWrapper = document.getElementById('wrapper-vertical');
+            const btnH = document.getElementById('btn-horizontal');
+            const btnV = document.getElementById('btn-vertical');
+
+            if(view === 'horizontal') {
+                hWrapper.style.display = 'flex'; 
+                vWrapper.style.display = 'none';
+                btnH.className = "flex-1 bg-orange-500 text-white font-bold py-3 px-4 rounded-xl shadow-sm transition-all";
+                btnV.className = "flex-1 bg-white text-orange-500 border-2 border-orange-200 font-bold py-3 px-4 rounded-xl shadow-sm transition-all";
+            } else {
+                hWrapper.style.display = 'none'; 
+                vWrapper.style.display = 'flex';
+                btnV.className = "flex-1 bg-orange-500 text-white font-bold py-3 px-4 rounded-xl shadow-sm transition-all";
+                btnH.className = "flex-1 bg-white text-orange-500 border-2 border-orange-200 font-bold py-3 px-4 rounded-xl shadow-sm transition-all";
+            }
+            
+            requestAnimationFrame(adjustCardScale);
+        }
+
+        function adjustCardScale() {
+            const container = document.getElementById('card-scale-container');
+            const availableWidth = container.clientWidth - 32; 
+            const availableHeight = Math.max(window.innerHeight - 300, 300); 
+
+            const hCard = document.getElementById('card-horizontal');
+            const hScaler = document.getElementById('h-scaler');
+            const vCard = document.getElementById('card-vertical');
+            const vScaler = document.getElementById('v-scaler');
+
+            hCard.style.transform = 'none';
+            vCard.style.transform = 'none';
+
+            requestAnimationFrame(() => {
+                if (currentView === 'horizontal') {
+                    const naturalWidth = 700;
+                    const naturalHeight = hCard.offsetHeight; 
+                    let scale = 1;
+                    const scaleW = availableWidth / naturalWidth;
+                    const scaleH = availableHeight / naturalHeight;
+                    if (scaleW < 1 || scaleH < 1) { scale = Math.min(scaleW, scaleH); }
+                    
+                    hCard.style.transform = `scale(${scale})`;
+                    hScaler.style.width = `${naturalWidth * scale}px`;
+                    hScaler.style.height = `${naturalHeight * scale}px`;
+                } else {
+                    const naturalWidth = 380;
+                    const naturalHeight = vCard.offsetHeight;
+                    let scale = 1;
+                    const scaleW = availableWidth / naturalWidth;
+                    const scaleH = availableHeight / naturalHeight;
+                    if (scaleW < 1 || scaleH < 1) { scale = Math.min(scaleW, scaleH); }
+
+                    vCard.style.transform = `scale(${scale})`;
+                    vScaler.style.width = `${naturalWidth * scale}px`;
+                    vScaler.style.height = `${naturalHeight * scale}px`;
+                }
+            });
+        }
+
+        window.addEventListener('resize', adjustCardScale);
+
+        function generateCard() {
+            const ans = userData.answers;
+            const orderFormatted = userData.order;
+            activeUserNickname = ans.nickname;
+
+            document.getElementById('h_order').innerText = orderFormatted;
+            document.getElementById('h_motto').innerText = `"${ans.motto}"`;
+            document.getElementById('h_name').innerHTML = `${ans.fullname} <span style="color:#ea580c">(${ans.nickname})</span>`;
+            document.getElementById('h_major_text').innerText = `สายวิชาชีพ: ${ans.major}`;
+            document.getElementById('h_dream').innerText = ans.dream;
+            document.getElementById('h_dedicate').innerText = `ทำทุกอย่างวันนี้ เพื่อให้ "${ans.dedicate}" สบาย`;
+
+            document.getElementById('v_order').innerText = orderFormatted;
+            document.getElementById('v_motto').innerText = `"${ans.motto}"`;
+            document.getElementById('v_name').innerHTML = `${ans.fullname} <br><span style="color:#ea580c">(${ans.nickname})</span>`;
+            document.getElementById('v_major_text').innerText = `สายวิชาชีพ: ${ans.major}`;
+            document.getElementById('v_dream').innerText = ans.dream;
+            document.getElementById('v_dedicate').innerText = `ทำทุกอย่างวันนี้ เพื่อให้ "${ans.dedicate}" สบาย`;
+
+            showScreen('screen-result');
+            switchView('horizontal'); 
+            
+            setTimeout(() => { adjustCardScale(); }, 100);
+        }
+
+        const TEXT_OFFSETS = {
+            horizontal: {
+                title:         { x: 0, y: -20 },   
+                noBox:         { x: 0, y: 0 },     
+                noText:        { x: 0, y: -10 },   
+                motto:         { x: 0, y: -15 },   
+                name:          { x: 0, y: -20 },   
+                majorBox:      { x: 0, y: -10 },   
+                majorText:     { x: 0, y: -8 },    
+                labelDream:    { x: 0, y: -10 },   
+                dream:         { x: 0, y: -15 },   
+                labelDedicate: { x: 0, y: -10 },   
+                dedicate:      { x: 0, y: -15 }    
+            },
+            vertical: {
+                title:         { x: 0, y: -20 },   
+                noBox:         { x: 0, y: 0 },     
+                noText:        { x: 0, y: -10 },   
+                motto:         { x: 0, y: -15 },   
+                name:          { x: 0, y: -15 },   
+                majorBox:      { x: 0, y: -10 },   
+                majorText:     { x: 0, y: -8 },    
+                labelDream:    { x: 0, y: -10 },   
+                dream:         { x: 0, y: -10 },   
+                labelDedicate: { x: 0, y: -10 },   
+                dedicate:      { x: 0, y: -10 }    
+            }
+        };
+
+        function applyOffset(doc, id, offsetData) {
+            const el = doc.getElementById(id);
+            if (el && (offsetData.x !== 0 || offsetData.y !== 0)) {
+                el.style.position = 'relative';
+                el.style.left = `${offsetData.x}px`;
+                el.style.top = `${offsetData.y}px`;
+            }
+        }
+
+        async function downloadCurrentCard() {
+            const cardId = currentView === 'horizontal' ? 'card-horizontal' : 'card-vertical';
+            const card = document.getElementById(cardId);
+            const overlay = document.getElementById('capture-overlay');
+            const btn = document.getElementById('btn-download');
+            
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "⏳ กำลังบันทึกภาพ... (รอสักครู่)";
+            btn.disabled = true;
+            
+            overlay.classList.remove('hidden');
+
+            try {
+                await document.fonts.ready;
+
+                const originalTransform = card.style.transform;
+                card.style.transform = 'scale(1)';
+                
+                await new Promise(r => setTimeout(r, 200));
+
+                const canvas = await html2canvas(card, { 
+                    scale: 3, 
+                    backgroundColor: null, 
+                    useCORS: true,
+                    onclone: (doc) => { 
+                        doc.getElementById(cardId).style.boxShadow = 'none'; 
+
+                        // 🌟🌟 แก้ไขระบบความฟุ้งของวงกลม (Orbs) ตรงนี้ครับ 🌟🌟
+                        const clonedInner = doc.querySelector(`#${cardId} .my-card-h-inner`) || doc.querySelector(`#${cardId} .my-card-v-inner`);
+                        if (clonedInner) {
+                            const clonedOrbs = clonedInner.querySelectorAll('.orb-orange, .orb-red');
+                            clonedOrbs.forEach(orb => {
+                                const isOrange = orb.classList.contains('orb-orange');
+                                
+                                // 1. ปิด Filter และ Opacity เดิมทิ้ง เพราะ html2canvas ไม่เข้าใจ
+                                orb.style.filter = 'none';
+                                orb.style.webkitFilter = 'none';
+                                orb.style.opacity = '1';
+                                
+                                // 2. ล้างสีพื้นหลังแบบทึบ (ตัวการที่ทำให้แข็ง) ออกไป
+                                orb.style.backgroundColor = 'transparent';
+                                orb.style.boxShadow = 'none';
+
+                                // 3. สร้างความฟุ้งด้วย Radial Gradient เลียนแบบ Blur เนียนๆ
+                                if (isOrange) {
+                                    orb.style.background = 'radial-gradient(circle, rgba(249,115,22,0.25) 0%, rgba(249,115,22,0.05) 40%, rgba(249,115,22,0) 70%)';
+                                } else {
+                                    orb.style.background = 'radial-gradient(circle, rgba(239,68,68,0.25) 0%, rgba(239,68,68,0.05) 40%, rgba(239,68,68,0) 70%)';
+                                }
+                            });
+                        }
+
+                        if (currentView === 'horizontal') {
+                            applyOffset(doc, 'h_title', TEXT_OFFSETS.horizontal.title);
+                            applyOffset(doc, 'h_no_box', TEXT_OFFSETS.horizontal.noBox);
+                            applyOffset(doc, 'h_no_text', TEXT_OFFSETS.horizontal.noText);
+                            applyOffset(doc, 'h_motto', TEXT_OFFSETS.horizontal.motto);
+                            applyOffset(doc, 'h_name', TEXT_OFFSETS.horizontal.name);
+                            applyOffset(doc, 'h_major_box', TEXT_OFFSETS.horizontal.majorBox);
+                            applyOffset(doc, 'h_major_text', TEXT_OFFSETS.horizontal.majorText);
+                            applyOffset(doc, 'h_label_dream', TEXT_OFFSETS.horizontal.labelDream);
+                            applyOffset(doc, 'h_dream', TEXT_OFFSETS.horizontal.dream);
+                            applyOffset(doc, 'h_label_dedicate', TEXT_OFFSETS.horizontal.labelDedicate);
+                            applyOffset(doc, 'h_dedicate', TEXT_OFFSETS.horizontal.dedicate);
+                        } else {
+                            applyOffset(doc, 'v_title', TEXT_OFFSETS.vertical.title);
+                            applyOffset(doc, 'v_no_box', TEXT_OFFSETS.vertical.noBox);
+                            applyOffset(doc, 'v_no_text', TEXT_OFFSETS.vertical.noText);
+                            applyOffset(doc, 'v_motto', TEXT_OFFSETS.vertical.motto);
+                            applyOffset(doc, 'v_name', TEXT_OFFSETS.vertical.name);
+                            applyOffset(doc, 'v_major_box', TEXT_OFFSETS.vertical.majorBox);
+                            applyOffset(doc, 'v_major_text', TEXT_OFFSETS.vertical.majorText);
+                            applyOffset(doc, 'v_label_dream', TEXT_OFFSETS.vertical.labelDream);
+                            applyOffset(doc, 'v_dream', TEXT_OFFSETS.vertical.dream);
+                            applyOffset(doc, 'v_label_dedicate', TEXT_OFFSETS.vertical.labelDedicate);
+                            applyOffset(doc, 'v_dedicate', TEXT_OFFSETS.vertical.dedicate);
+                        }
+                    }
+                });
+                
+                card.style.transform = originalTransform;
+                adjustCardScale();
+
+                const link = document.createElement('a');
+                const typeStr = currentView === 'horizontal' ? 'Landscape' : 'Portrait';
+                link.download = `HomeComing_Card_${activeUserNickname}_${typeStr}.png`;
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+                
+                btn.innerHTML = "✅ บันทึกรูปภาพสำเร็จ!";
+                setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 2000);
+
+            } catch (err) {
+                console.error(err);
+                alert("เกิดข้อผิดพลาดในการบันทึกภาพ กรุณาลองใหม่อีกครั้ง");
+                btn.innerHTML = originalText; btn.disabled = false;
+            } finally {
+                overlay.classList.add('hidden');
+            }
+        }
+        function fetchLiveCount() {
+            fetch(SCRIPT_URL + "?action=getSingleCount&sheet=กรุงเทพ") 
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === 'success') { document.getElementById('live-count').innerText = data.count; }
+                }).catch(err => console.log('Live count error', err));
+        }
+
+        fetchLiveCount();
+        setInterval(fetchLiveCount, 10000);
+    </script>
+</body>
+</html>
