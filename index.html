@@ -172,46 +172,62 @@
             3: 'รอบที่ 3 : กรุงเทพฯ (14.00-15.30)'
         };
 
-        // 🌟 ฟังก์ชันวาดตัวเลขตรงกลาง QR Code 🌟
+        // 🌟 1. ฟังก์ชันวาดตัวเลขและวงกลมเจาะรู 🌟
         function addCenterNumber(canvas, number) {
             const ctx = canvas.getContext('2d');
             const cw = canvas.width;
             const ch = canvas.height;
             const cx = cw / 2;
             const cy = ch / 2;
-            const r = cw * 0.15; // รัศมีวงกลม 15% ของขนาด QR
+            const r = cw * 0.15; // รัศมีวงกลม 15% ของขนาดรูป
 
-            // 1. เจาะรูวงกลมพื้นหลังสีขาว
+            // วาดวงกลมสีขาวทับตรงกลาง
             ctx.beginPath();
             ctx.arc(cx, cy, r, 0, 2 * Math.PI);
             ctx.fillStyle = '#ffffff';
             ctx.fill();
 
-            // 2. วาดเส้นขอบวงกลมสีส้มให้ดูมีมิติ
-            ctx.lineWidth = cw * 0.015;
+            // วาดขอบสีส้ม
+            ctx.lineWidth = Math.max(2, cw * 0.015);
             ctx.strokeStyle = '#ea580c';
             ctx.stroke();
 
-            // 3. ใส่ตัวเลขหนาๆ สีส้มไว้ตรงกลาง
-            ctx.font = "900 " + (cw * 0.2) + "px 'Prompt', sans-serif";
+            // ใส่ตัวเลข
+            ctx.font = "900 " + (cw * 0.22) + "px 'Prompt', sans-serif";
             ctx.fillStyle = '#ea580c';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(number, cx, cy + (cw * 0.015)); // offset นิดหน่อยให้ศูนย์กลางตรง
+            ctx.fillText(number, cx, cy + (cw * 0.015)); 
+        }
+
+        // 🌟 2. ฟังก์ชันจับภาพที่วาดลง Canvas ไปยัดใส่ img เพื่อโชว์บนเว็บ 🌟
+        function applyNumberToVisibleQR(elementId, number) {
+            const container = document.getElementById(elementId);
+            if (!container) return;
+            
+            const canvas = container.querySelector('canvas');
+            const img = container.querySelector('img'); 
+            
+            if (canvas && img) {
+                addCenterNumber(canvas, number);
+                // qrcode.js สร้าง img ไว้บัง canvas เราต้องเอารูปใหม่ไปใส่ img
+                img.src = canvas.toDataURL("image/png");
+                img.style.display = "block"; 
+            }
         }
 
         function generateQRs() {
-            // สร้าง QR โค้ดปกติก่อน (ระดับ H กันพัง)
+            // สร้าง QR Code ปกติก่อน
             new QRCode(document.getElementById("qr1"), { text: links[1], width: 160, height: 160, colorDark : "#451a03", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
             new QRCode(document.getElementById("qr2"), { text: links[2], width: 160, height: 160, colorDark : "#451a03", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
             new QRCode(document.getElementById("qr3"), { text: links[3], width: 160, height: 160, colorDark : "#451a03", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
 
-            // รอเสี้ยววิให้ไลบรารีสร้างเสร็จ แล้วค่อยวาดเลขทับลงไป
+            // รอให้วาดเสร็จ แล้วค่อยอัปเดตหน้าจอให้มีตัวเลข
             setTimeout(() => {
-                const c1 = document.querySelector("#qr1 canvas"); if(c1) addCenterNumber(c1, 1);
-                const c2 = document.querySelector("#qr2 canvas"); if(c2) addCenterNumber(c2, 2);
-                const c3 = document.querySelector("#qr3 canvas"); if(c3) addCenterNumber(c3, 3);
-            }, 50);
+                applyNumberToVisibleQR("qr1", 1);
+                applyNumberToVisibleQR("qr2", 2);
+                applyNumberToVisibleQR("qr3", 3);
+            }, 150); 
         }
 
         window.onload = generateQRs;
@@ -224,6 +240,7 @@
             qrZoomedContainer.innerHTML = '';
             document.getElementById('modal-title').innerText = `รอบที่ ${round} : กรุงเทพฯ`;
 
+            // สร้าง QR ในหน้าซูม
             new QRCode(qrZoomedContainer, {
                 text: links[round],
                 width: 250, height: 250,
@@ -231,11 +248,10 @@
                 correctLevel : QRCode.CorrectLevel.H
             });
 
-            // วาดเลขตรงกลางในหน้าจอขยาย
+            // อัปเดตให้มีเลขตรงกลาง
             setTimeout(() => {
-                const cZoom = qrZoomedContainer.querySelector("canvas");
-                if (cZoom) addCenterNumber(cZoom, round);
-            }, 50);
+                applyNumberToVisibleQR("qr-zoomed", round);
+            }, 150);
 
             const btnDownload = document.getElementById('btn-zoom-download');
             btnDownload.onclick = () => downloadHighResQR(round, `Round${round}_BKK`, labels[round]);
@@ -258,10 +274,12 @@
             setTimeout(() => { modal.classList.add('hidden'); }, 300);
         }
 
+        // 🌟 3. ระบบดาวน์โหลดภาพความละเอียดสูง 🌟
         function downloadHighResQR(round, filename, labelText) {
             const container = document.getElementById('qr-highres-container');
             container.innerHTML = ''; 
             
+            // แอบสร้าง 1000x1000 px
             new QRCode(container, {
                 text: links[round],
                 width: 1000, 
@@ -275,7 +293,7 @@
                 const highResCanvas = container.querySelector('canvas');
                 if (!highResCanvas) { alert("เกิดข้อผิดพลาดในการสร้างไฟล์ โปรดลองใหม่"); return; }
 
-                // 🌟 วาดตัวเลขลงใน QR 1000px ก่อนเอาไปรวมร่าง 🌟
+                // เจาะรูตรงกลางไฟล์ 1000px
                 addCenterNumber(highResCanvas, round);
 
                 const padding = 120;       
@@ -287,11 +305,14 @@
                 newCanvas.width = highResCanvas.width + (padding * 2);
                 newCanvas.height = highResCanvas.height + textSpace + (padding * 2);
                 
+                // เทพื้นขาว
                 ctx.fillStyle = "#ffffff";
                 ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
                 
+                // วาง QR
                 ctx.drawImage(highResCanvas, padding, padding);
                 
+                // พิมพ์ข้อความด้านล่าง
                 ctx.fillStyle = "#ea580c"; 
                 ctx.font = "bold 60px 'Prompt', sans-serif";
                 ctx.textAlign = "center";
@@ -299,11 +320,12 @@
                 
                 ctx.fillText(labelText, newCanvas.width / 2, highResCanvas.height + padding + 40);
                 
+                // ดาวน์โหลด
                 const link = document.createElement('a');
                 link.download = `QR_HomeComing_${filename}.png`;
                 link.href = newCanvas.toDataURL("image/png");
                 link.click();
-            }, 100); 
+            }, 150); 
         }
     </script>
 </body>
